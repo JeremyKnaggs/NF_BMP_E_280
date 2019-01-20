@@ -6,6 +6,7 @@ using Windows.Devices.I2c;
 
 namespace Bmp280_Nano
 {
+    //Below Code is a scratchspace for troubleshooting BMP BME 280 communications and is heavily moded from:
     // code migrated from https://raw.githubusercontent.com/adafruit/Adafruit_BMP280_Library/master/Adafruit_BMP280.cpp
     // http://lxr.free-electrons.com/source/drivers/iio/pressure/BMP280.c
     // https://github.com/BoschSensortec/BMP280_driver
@@ -106,7 +107,7 @@ namespace Bmp280_Nano
         //public Temperature Temperature => Temperature.From(GetTemperature(), TemperatureUnit.DegreeCelsius);
         //public Pressure Pressure => Pressure.From(GetPressure(), PressureUnit.Pascal);
 
-        public BMP280(int i2cAddress = 0x76)
+        public BMP280(int i2cAddress = 0x77)
         {
             I2C_ADDRESS = i2cAddress;
         }
@@ -128,8 +129,7 @@ namespace Bmp280_Nano
                 var settings = new I2cConnectionSettings(I2C_ADDRESS);
                 settings.BusSpeed = I2cBusSpeed.StandardMode;//.StandardMode;//.FastMode;
                 settings.SharingMode = I2cSharingMode.Shared;
-                //string aqs = I2cDevice.GetDeviceSelector(I2cControllerName);  /* Find the selector string for the I2C bus controller                   */
-                //var dis = DeviceInformation.FindAllAsync(aqs);            /* Find the I2C bus controller device with our selector string           */
+               
                 I2CDevice = I2cDevice.FromId(I2cControllerName, settings);//  await I2cDevice.FromIdAsync(dis[0].Id, settings);    /* Create an I2cDevice with our selected bus controller and I2C settings */
                 Thread.Sleep(200);
                 //byte[] readChipID = new byte[] { (byte)Register.REGISTER_CHIPID };// 0xd0
@@ -200,8 +200,6 @@ namespace Bmp280_Nano
         {
             byte[] result = new byte[1];
             I2CDevice.WriteRead(new byte[] { (byte)reg }, result);// Original Format
-            //I2CDevice.WriteRead(new byte[] { (byte)reg }, new byte[0]);
-            //I2CDevice.WriteRead(new byte[0], result);
             var ForReturn = result[0];
             if(ForReturn == 0)
             {
@@ -219,8 +217,6 @@ namespace Bmp280_Nano
         {
             byte[] result = new byte[2];
             I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
-            //I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, new byte[0]);
-            //I2CDevice.WriteRead(new byte[0], result);
             var ForReturn = (ushort)(result[0] << 8 | result[1]);
             if (ForReturn == 0)
             {
@@ -263,8 +259,6 @@ namespace Bmp280_Nano
         {
             byte[] result = new byte[3];
            I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
-           // I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, new byte[0]);
-            //I2CDevice.WriteRead(new byte[0] , result);
             var ForReturn =result[0] << 16 | result[1] << 8 | result[2];
             if (ForReturn == 0)
             {

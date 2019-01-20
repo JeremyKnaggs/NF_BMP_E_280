@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Bmp280_Nano
 {
+    //Below Code is a scratchspace for troubleshooting BMP BME 280 communications and is heavily moded from original (see BMP280.cs):
     public class BME280 : BMP280
     {
 
@@ -20,7 +21,7 @@ namespace Bmp280_Nano
 
         public double Humidity => GetHumidity();
 
-        public BME280(int i2cAddress = 0x76) : base(i2cAddress)
+        public BME280(int i2cAddress = 0x77) : base(i2cAddress)
         {
         }
 

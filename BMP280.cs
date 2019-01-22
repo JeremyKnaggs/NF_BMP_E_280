@@ -14,7 +14,7 @@ namespace Bmp280_Nano
     public class BMP280 
     {
 
-        public int MaxRetry=10;
+        public int MaxRetry=20;
         const byte DeviceSignature = 0x60;
         //Method to write the control measurment register (default 0xB7)
         //010  101  11 
@@ -132,25 +132,19 @@ namespace Bmp280_Nano
                
                 I2CDevice = I2cDevice.FromId(I2cControllerName, settings);//  await I2cDevice.FromIdAsync(dis[0].Id, settings);    /* Create an I2cDevice with our selected bus controller and I2C settings */
                 Thread.Sleep(200);
-                //byte[] readChipID = new byte[] { (byte)Register.REGISTER_CHIPID };// 0xd0
+
                 byte[] readChipID = new byte[] { (byte)0xd0 };
-                byte[] EmptyreadChipID = new byte[0];
-                byte[] EmptyReadBuffer = new byte[0];// { 0xFF };
+
                 byte[] ReadBuffer = new byte[] { 0xFF };
                var nnn = I2CDevice.WriteReadPartial(readChipID, ReadBuffer);    //Read the device signature        
-                var nn= I2CDevice.WriteReadPartial(readChipID, EmptyReadBuffer);    //Read the device signature          
-               var nm= I2CDevice.WriteReadPartial(EmptyreadChipID, ReadBuffer);    //Read the device signature          
 
-                if (ReadBuffer[0] != DeviceSignature)
-                {        //Verify the device signature
-                    //return;
-                    var ddd_StopHereForDebugging = 0;
-                }
-                I2CDevice.Write(readChipID);
-                I2CDevice.Read(ReadBuffer);
-                var Test_read = I2CDevice.WriteReadPartial(readChipID, ReadBuffer);
-                var Test_read2 = I2CDevice.WriteReadPartial(readChipID, EmptyReadBuffer);
-                var Test_read3 = I2CDevice.WriteReadPartial(EmptyreadChipID, ReadBuffer);
+
+                //if (ReadBuffer[0] != DeviceSignature)
+                //{        //Verify the device signature
+                //    //return;
+                //    var ddd_StopHereForDebugging = 0;
+                //}
+
 
                 ReadCoefficients();
 
@@ -199,9 +193,10 @@ namespace Bmp280_Nano
         protected byte Read8(Register reg, int retry = 0)
         {
             byte[] result = new byte[1];
-            I2CDevice.WriteRead(new byte[] { (byte)reg }, result);// Original Format
+           // I2CDevice.WriteRead(new byte[] { (byte)reg }, result);// Original Format
+            var Result = I2CDevice.WriteReadPartial(new byte[] { (byte)reg }, result);
             var ForReturn = result[0];
-            if(ForReturn == 0)
+            if(Result.Status != I2cTransferStatus.FullTransfer)
             {
                 if (retry < MaxRetry)
                 {
@@ -216,9 +211,10 @@ namespace Bmp280_Nano
         protected ushort Read16(Register reg, int retry = 0)
         {
             byte[] result = new byte[2];
-            I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
+            //I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
+            var Result = I2CDevice.WriteReadPartial(new byte[] { (byte)reg, 0x00 }, result);
             var ForReturn = (ushort)(result[0] << 8 | result[1]);
-            if (ForReturn == 0)
+            if (Result.Status!= I2cTransferStatus.FullTransfer)
             {
                 if (retry < MaxRetry)
                 {
@@ -235,15 +231,7 @@ namespace Bmp280_Nano
         {
             ushort temp = Read16(reg);
             var ForReturn = (ushort)(temp >> 8 | temp << 8);
-            if (ForReturn == 0)
-            {
-                if (retry < MaxRetry)
-                {
-                    int newRetry = retry + 1;
-                    return Read16_LE(reg, newRetry);
-                }
-                return ForReturn;
-            }
+           
             return ForReturn;
         }
 
@@ -258,9 +246,10 @@ namespace Bmp280_Nano
         Int32 Read24(Register reg, int retry = 0)
         {
             byte[] result = new byte[3];
-           I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
+           //I2CDevice.WriteRead(new byte[] { (byte)reg, 0x00 }, result);// Original Format
+            var Result = I2CDevice.WriteReadPartial(new byte[] { (byte)reg, 0x00 }, result);
             var ForReturn =result[0] << 16 | result[1] << 8 | result[2];
-            if (ForReturn == 0)
+            if (Result.Status != I2cTransferStatus.FullTransfer)
             {
                 if (retry < MaxRetry)
                 {
@@ -339,10 +328,10 @@ namespace Bmp280_Nano
             }
         }
 
-        public void Dispose()
-        {
-            I2CDevice?.Dispose(); // c# checks for null then call dispose
-            I2CDevice = null;
-        }
+        //public void Dispose()
+        //{
+        //    I2CDevice?.Dispose(); // c# checks for null then call dispose
+        //    I2CDevice = null;
+        //}
     }
 }
